@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="64" tileheight="64" nextobjectid="218">
+ <tileset firstgid="1" name="wall" tilewidth="64" tileheight="64">
+  <image source="wall.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="2" name="box" tilewidth="64" tileheight="64">
+  <image source="box.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="3" name="floor" tilewidth="64" tileheight="64">
+  <image source="floor.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="4" name="player" tilewidth="64" tileheight="64">
+  <image source="player.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="5" name="goal" tilewidth="64" tileheight="64">
+  <image source="goal.png" width="64" height="64"/>
+ </tileset>
+ <layer name="块层 1" width="10" height="10">
+  <data encoding="base64" compression="zlib">
+   eJxjZmBgYB7FgwYDAO5IAS0=
+  </data>
+ </layer>
+ <objectgroup name="wall">
+  <object id="18" gid="1" x="0" y="64" width="64" height="64"/>
+  <object id="19" gid="1" x="64" y="64" width="64" height="64"/>
+  <object id="20" gid="1" x="128" y="64" width="64" height="64"/>
+  <object id="21" gid="1" x="192" y="64" width="64" height="64"/>
+  <object id="61" gid="1" x="256" y="64" width="64" height="64"/>
+  <object id="62" gid="1" x="320" y="64" width="64" height="64"/>
+  <object id="63" gid="1" x="384" y="64" width="64" height="64"/>
+  <object id="64" gid="1" x="384" y="64" width="64" height="64"/>
+  <object id="65" gid="1" x="448" y="64" width="64" height="64"/>
+  <object id="66" gid="1" x="512" y="64" width="64" height="64"/>
+  <object id="67" gid="1" x="576" y="64" width="64" height="64"/>
+  <object id="68" gid="1" x="576" y="128" width="64" height="64"/>
+  <object id="69" gid="1" x="576" y="192" width="64" height="64"/>
+  <object id="70" gid="1" x="576" y="256" width="64" height="64"/>
+  <object id="71" gid="1" x="576" y="320" width="64" height="64"/>
+  <object id="72" gid="1" x="576" y="384" width="64" height="64"/>
+  <object id="73" gid="1" x="576" y="448" width="64" height="64"/>
+  <object id="74" gid="1" x="576" y="512" width="64" height="64"/>
+  <object id="75" gid="1" x="576" y="576" width="64" height="64"/>
+  <object id="76" gid="1" x="576" y="576" width="64" height="64"/>
+  <object id="81" gid="1" x="576" y="640" width="64" height="64"/>
+  <object id="82" gid="1" x="512" y="640" width="64" height="64"/>
+  <object id="83" gid="1" x="448" y="640" width="64" height="64"/>
+  <object id="84" gid="1" x="384" y="640" width="64" height="64"/>
+  <object id="85" gid="1" x="320" y="640" width="64" height="64"/>
+  <object id="86" gid="1" x="256" y="640" width="64" height="64"/>
+  <object id="87" gid="1" x="192" y="640" width="64" height="64"/>
+  <object id="88" gid="1" x="128" y="640" width="64" height="64"/>
+  <object id="89" gid="1" x="64" y="640" width="64" height="64"/>
+  <object id="90" gid="1" x="0" y="640" width="64" height="64"/>
+  <object id="91" gid="1" x="0" y="576" width="64" height="64"/>
+  <object id="92" gid="1" x="0" y="448" width="64" height="64"/>
+  <object id="93" gid="1" x="0" y="512" width="64" height="64"/>
+  <object id="94" gid="1" x="0" y="384" width="64" height="64"/>
+  <object id="95" gid="1" x="0" y="320" width="64" height="64"/>
+  <object id="97" gid="1" x="0" y="256" width="64" height="64"/>
+  <object id="98" gid="1" x="0" y="192" width="64" height="64"/>
+  <object id="99" gid="1" x="0" y="128" width="64" height="64"/>
+  <object id="193" gid="1" x="384" y="320" width="64" height="64"/>
+  <object id="194" gid="1" x="320" y="256" width="64" height="64"/>
+  <object id="195" gid="1" x="320" y="192" width="64" height="64"/>
+  <object id="196" gid="1" x="320" y="128" width="64" height="64"/>
+  <object id="198" gid="1" x="192" y="384" width="64" height="64"/>
+  <object id="199" gid="1" x="384" y="448" width="64" height="64"/>
+  <object id="201" gid="1" x="320" y="448" width="64" height="64"/>
+  <object id="203" gid="1" x="256" y="448" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup name="box">
+  <object id="209" gid="2" x="128" y="192" width="64" height="64"/>
+  <object id="215" gid="2" x="128" y="256" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup name="floor"/>
+ <objectgroup name="player">
+  <object id="102" gid="4" x="128" y="128" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup name="goal">
+  <object id="103" gid="5" x="512" y="128" width="64" height="64"/>
+  <object id="210" gid="5" x="384" y="128" width="64" height="64"/>
+ </objectgroup>
+</map>
