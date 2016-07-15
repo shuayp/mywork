@@ -1,16 +1,21 @@
-//#include "ChooseLevelScene.h"
 #include "HelloWorldScene.h"
 #include"Level_1Scene.h"
 #include"HuanRun.h"
-
+#include "SecondScene.h"
+#include "SimpleAudioEngine.h"
 #include<iostream>
 
 int static TimeNum;
 char C_GetScore[20];//所得分数用到
 const static float TORAD = 3.1415926 / 180.f;
-static int i = 60;
 
 USING_NS_CC;
+
+Level_1Scene::Level_1Scene() {
+}
+
+Level_1Scene::~Level_1Scene() {
+}
 
 Scene* Level_1Scene::createScence(){
 	auto scene = Scene::create();
@@ -24,15 +29,25 @@ bool Level_1Scene::init() {
 	if (!Layer::init()){
 		return false;
 	}
-	TotalScore = 0;
-	pTime = 90;
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	if (!CocosDenshion::SimpleAudioEngine::sharedEngine()->isBackgroundMusicPlaying())
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("game_music.wma");
+
+	TotalScore = 0;
+
+	//添加菜单
+	auto menuitem = MenuItemFont::create("Menu", CC_CALLBACK_1(Level_1Scene::openmenu, this));
+	menuitem->setColor(ccc3(255,255,255));
+	auto menu = Menu::create();
+	menu->addChild(menuitem);
+	menu->setPosition(menuitem->getContentSize().width / 2, visibleSize.height - menuitem->getContentSize().height / 2);
+	addChild(menu, 2);
+
+
 	initTouchEvent();
-	//CCTexture2D *texture = CCTextureCache::sharedTextureCache()->addImage("game_bg.jpg");
-	//CCSprite *bgsprite = Sprite::createWithTexture(texture);
 	//添加背景
 	auto bgsprite = Sprite::create("game_bg.png");
 	float odds;
@@ -44,18 +59,17 @@ bool Level_1Scene::init() {
 	bgsprite->setPosition(Vec2(visibleSize / 2) + origin);
 	addChild(bgsprite);
 
+	//添加圆环
 	Winsize = CCDirector::sharedDirector()->getWinSize();
 	huanRun = new HuanRun();
 	huanRun->autorelease();
 	huanRun->setPosition(ccp(Winsize.width / 2 - 2,Winsize.height / 2 + 200));
 	this->addChild(huanRun);
 	huanRun->runRotateAction();
-	if (huanRun->getPosition().x <= huanRun->getContentSize().width /2) {
-	huanRun->runToPoint(ccp(Winsize.width / 2 - 2, Winsize.height / 2 + 200));
-	huanRun->runRotateAction();
-	}
 
 	setTouchEnabled(true);
+
+	//设置监听事件
 	auto dispatcher = Director::getInstance()->getEventDispatcher();
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->onTouchBegan = CC_CALLBACK_2(Level_1Scene::onTouchBegan, this);
@@ -67,12 +81,7 @@ bool Level_1Scene::init() {
 	support->setPosition(visibleSize.width / 2, 0+support->getContentSize().height/2);
 	addChild(support);
 
-
-	//摆动拉环
-	//auto game_hand = Sprite::create("game_hand.png");
-	//game_hand->setPosition(ccp(visibleSize.width / 2 - 2, visibleSize.height / 2+60));
-   // addChild(game_hand);
-	//auto m_biS_catch = false;
+	//设置金币和炸弹的出现
 	this->schedule(schedule_selector(Level_1Scene::gameLogic), 1.0);
 	this->schedule(schedule_selector(Level_1Scene::gameLogic1), 3.0);
 
@@ -84,73 +93,89 @@ bool Level_1Scene::init() {
 	boUnitArray->retain();
 	
 	schedule(schedule_selector(Level_1Scene::checkupHip), 0.02);//检测碰撞
-
 	schedule(schedule_selector(Level_1Scene::update), 0.02);//检测碰撞
 
 
-	//this->addItemWithType(Item_gold, Gold_i);
-	//this->addItemWithType(Item_stone, store_i);
-	//this->addItemWithType(Item_diamond, Diamond_i);
-
-	//时间倒退效果
-
-	//GameTimer * m_timer = GameTimer::createTimer(90);
-	//m_timer->setPosition(100, 500);
-	//this->addChild(m_timer);
-
-
 	label1 = Label::create("", "fonts/Marker Felt.ttf", 40);
-	label1->setPosition(30, Winsize.height-30);
+	label1->setPosition(Winsize.width/2, Winsize.height-30);
 	this->addChild(label1);
 	schedule(schedule_selector(Level_1Scene::update1));//计分
 
-	label = Label::create("","fonts/Marker Felt.ttf",40);
-	label->setPosition(Winsize.width-30, Winsize.height-30);
-	this->addChild(label);
-	schedule(schedule_selector(Level_1Scene::update2));//记时
 
-    //pos = huanRun->getPosition();//开始点
-	//rotateAngle = 0.f; //旋转的弧度
-	//addAngle = 1.f*TORAD; //每次旋转的弧度
-
-	//ScoreRun();
-
-	auto backItem = MenuItemImage::create("back_normal.png", "back_clicked.png", CC_CALLBACK_1(Level_1Scene::ReturnMain, this));
-	backItem->setPosition(origin + Vec2(visibleSize.width, 0) - Vec2(backItem->getContentSize().width, -backItem->getContentSize().height));
-	auto menuback = Menu::create(backItem, NULL);
-	menuback->setPosition(Vec2::ZERO);
-	this->addChild(menuback, 1);
+    pos = huanRun->getPosition();//开始点
+	rotateAngle = 0.f; //旋转的弧度
+	addAngle = 1.f*TORAD; //每次旋转的弧度
 
 	return true;
 }
 
+
+//左上角的菜单栏
+void Level_1Scene::openmenu(Ref *ref) {
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	auto restartitem = MenuItemFont::create("Restart", CC_CALLBACK_1(Level_1Scene::menurestart, this));
+	auto quititem = MenuItemFont::create("Quit", CC_CALLBACK_1(Level_1Scene::menuquit, this));
+	auto backitem = MenuItemFont::create("Back", CC_CALLBACK_1(Level_1Scene::menuback, this));
+	restartitem->setColor(ccc3(0, 0, 0));
+	quititem->setColor(ccc3(0, 0, 0));
+	backitem->setColor(ccc3(0, 0, 0));
+
+	auto menu = Menu::create();
+	menu->addChild(backitem);
+	menu->addChild(restartitem);
+	menu->addChild(quititem);
+	menu->alignItemsVerticallyWithPadding(restartitem->getContentSize().height / 2 + 10);
+	menu->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+	addChild(menu, 10);
+}
+
+//菜单键返回
+void Level_1Scene::menuback(Ref *ref) {
+	auto startscene = HelloWorld::createScene();
+	Director::getInstance()->replaceScene(startscene);
+}
+
+//菜单键重新开始
+void Level_1Scene::menurestart(Ref *ref)
+{
+	auto SecondScene = Level_1Scene::createScence();
+	Director::getInstance()->replaceScene(SecondScene);
+}
+
+
+//菜单键退出
+void Level_1Scene::menuquit(Ref *ref) {
+	Director::getInstance()->end();
+}
+
+
+//更新分数并显示
 void Level_1Scene::update1(float dt) {
 	TotalScore += dt;
 	char*str = new char[10];
 	sprintf(str, "%d", (int)TotalScore);
 	label1->setString(str);
 }
-void Level_1Scene::update2(float dt) {
-	pTime -= dt;
-	if (pTime < 1) {
-		auto label2 = Label::createWithTTF("", "fonts/Marker Felt.ttf", 50);
-		label2->setColor(ccc3(255, 255, 225));
-		label2->setPosition(Winsize.width / 2, Winsize.height / 2);
-		addChild(label2, 88);
-		char*str2 = new char[10];
-		sprintf(str2, "Time up!! Your TotalScore Is %d", (int)TotalScore);
-		label2->setString(str2);
-		Director::getInstance()->pause();
 
-	}
-	char*str1 = new char[10];
-	sprintf(str1, "%d", (int)pTime);
-	label->setString(str1);
 
+//跳到下一个关卡
+void Level_1Scene::NextScene(Ref *ref) {
+	auto Scene = SecondScene::createScene();
+	Director::getInstance()->replaceScene(Scene);
 }
+
 void Level_1Scene::gameLogic1(float dt) {
 	this->addbo();
 }
+
+void Level_1Scene::gameLogic(float dt) {
+	this->addTarget();
+}
+
+
+//添加控制键
 void Level_1Scene::initTouchEvent(){
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto menu = Menu::create();
@@ -215,68 +240,36 @@ bool Level_1Scene::onTouchBegan(CCTouch *pTouch, CCEvent *pEvent) {
 	return true;
 }
 
-void Level_1Scene::onTouchMoved(Touch *touch, CCEvent *pEvent)
-{
-	
-}
-
-void Level_1Scene::ccTouchEnded(CCSet *pTouch, CCEvent *pEvent)
-{
-
-}
-
-
-void Level_1Scene::checkupHip(float dt) {
-
-}
-
 void Level_1Scene::fun(CCNode *node){
 	removeChild(node);
 	ItemUnitArray->removeObject(node);
 }
 
-void Level_1Scene::gameLogic(float dt) {
-	this->addTarget();
-}
-
+//随机位置添加炸弹
 void Level_1Scene::addbo() {
 	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 	CCSprite *bo = CCSprite::create("bombicon.png");
 
 
-	//int actualY = rand() % rangeY + minY;
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	int actualY = random(0, int(visibleSize.width));
-	//target->setPosition(ccp(Winsize.width / 2 - 2, Winsize.height / 2 + 60));
-	//target->setPosition(ccp(winSize.width - target->getContentSize().width / 2.0, actualY));
 	bo->setPosition(ccp(actualY, Winsize.height / 2+50));
-	//bo->setPosition(ccp(actualY, Winsize.width / 2 - 30));
 	bo->setTag(1);
-	///bo->setTag(2);
 	if (0 < bo->getPosition().x && bo->getPosition().x < winSize.width / 2 - 50 || winSize.width/2 + 50 < bo->getPosition().x &&bo->getPosition().x < winSize.width){
 		this->addChild(bo);
-		//this->addChild(bo);
-		//GoldUnitArray->addObject(target);
 		boUnitArray->addObject(bo);
 
-		//随机速度
-		//float minDuration = 2.0;
-		////float maxDuration = 4.0;
-		//int rangeDuration = maxDuration - minDuration;
-		//float actualDuration = rand() % rangeDuration + minDuration;
-
-		//CCFiniteTimeAction *actionMove = CCMoveTo::create(10, ccp(actualY, 0 - target->getContentSize().width / 2.0));
 		CCFiniteTimeAction *actionMove1 = CCMoveTo::create(6, ccp(actualY, 0 - bo->getContentSize().height / 2.0));
 		//回收屏幕外的精灵
 		CCFiniteTimeAction *actionMoveDone = CCCallFuncN::create(this, callfuncN_selector(Level_1Scene::spriteMoveFinished));
-		//target->runAction(CCSequence::create(actionMove, actionMove1, actionMoveDone, NULL));
-		//target->runAction(CCSequence::create(actionMove, actionMoveDone, NULL));
+
 		bo->runAction(CCSequence::create(actionMove1, actionMoveDone, NULL));
 	}
 }
 
+//随机位置添加金币
 void Level_1Scene::addTarget() {
 	
 	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
@@ -286,29 +279,21 @@ void Level_1Scene::addTarget() {
 		Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 		int actualY = random(0, int(visibleSize.width));
-		//target->setPosition(ccp(Winsize.width / 2 - 2, Winsize.height / 2 + 60));
-		//target->setPosition(ccp(winSize.width - target->getContentSize().width / 2.0, actualY));
 		target->setPosition(ccp(actualY, Winsize.height / 2+50));
-		//bo->setPosition(ccp(actualY, Winsize.width / 2 - 30));
 		target->setTag(1);
-		///bo->setTag(2);
 		if (0 < target->getPosition().x && target->getPosition().x < winSize.width / 2 - 50 || winSize.width/2 + 50 < target->getPosition().x &&target->getPosition().x < winSize.width){
 		this->addChild(target);
-		//this->addChild(bo);
 		GoldUnitArray->addObject(target);
-		//boUnitArray->addObject(bo);
 		
 
 		CCFiniteTimeAction *actionMove = CCMoveTo::create(10, ccp(actualY, 0 - target->getContentSize().width / 2.0));
-		//CCFiniteTimeAction *actionMove1 = CCMoveTo::create(10, ccp(actualY, 0 - bo->getContentSize().width / 2.0));
 		//回收屏幕外的精灵
 		CCFiniteTimeAction *actionMoveDone = CCCallFuncN::create(this, callfuncN_selector(Level_1Scene::spriteMoveFinished));
-		//target->runAction(CCSequence::create(actionMove, actionMove1, actionMoveDone, NULL));
 		target->runAction(CCSequence::create(actionMove, actionMoveDone, NULL));
-		//bo->runAction(CCSequence::create(actionMove1, actionMoveDone, NULL));
 	}
 
 }
+
 
 void Level_1Scene::spriteMoveFinished(cocos2d::CCNode *sender){
 	CCSprite *sprite = (CCSprite *)sender;
@@ -319,6 +304,7 @@ void Level_1Scene::spriteMoveFinished(cocos2d::CCNode *sender){
 	}
 }
 
+//检测碰撞，如果碰到金币则加分，如果遇到炸弹，则结束游戏，并显示跳到下一关
 void Level_1Scene::update(float dt){
 	int score = 10;
 	for (int i = 0; i < GoldUnitArray->count(); i++) {
@@ -326,9 +312,9 @@ void Level_1Scene::update(float dt){
 		if (target->boundingBox().intersectsRect(huanRun->boundingBox())) {
 			GoldUnitArray->removeObjectAtIndex(i);
 			this->removeChild(target);
-			update1(10);
 			huanRun->runToPoint(ccp(Winsize.width / 2 - 2, Winsize.height / 2 + 200));
 			huanRun->runRotateAction();
+			update1(10);
 			break;
 		}
 		if (target->boundingBox().intersectsRect(support->boundingBox())) {
@@ -342,31 +328,55 @@ void Level_1Scene::update(float dt){
 	for (int i = 0; i < boUnitArray->count(); i++) {
 		CCSprite *bo = (CCSprite *)boUnitArray->objectAtIndex(i);
 		if (bo->boundingBox().intersectsRect(huanRun->boundingBox())) {
-			auto label_S = Label::createWithTTF("you lost", "fonts/Marker Felt.ttf", 50);
-			label_S->setColor(ccc3(255, 255, 225));
-			label_S->setPosition(Winsize.width / 2, Winsize.height / 2);
-			addChild(label_S, 88);
-			Director::getInstance()->pause();
+			this->unscheduleAllSelectors();
+			auto label2 = Label::createWithTTF("", "fonts/Marker Felt.ttf", 50);
+			label2->setColor(ccc3(255, 255, 225));
+			label2->setPosition(Winsize.width / 2, Winsize.height / 2);
+			addChild(label2, 88);
+			char*str2 = new char[10];
+			sprintf(str2, "Your TotalScore Is %d", (int)TotalScore);
+			label2->setString(str2);
+
+			auto item1 = MenuItemLabel::create(Label::createWithSystemFont("Next Level", "fonts/Marker Felt.ttf", 30), CC_CALLBACK_1(Level_1Scene::NextScene, this));
+			auto menu = Menu::create(item1, NULL);
+			menu->setPosition(Director::getInstance()->getVisibleSize().width / 2, Director::getInstance()->getVisibleSize().height / 2 + 40);
+			menu->alignItemsVerticallyWithPadding(30);
+			this->addChild(menu, 1);
+
+			this->stopAllActions();
 			
 			break;
 		}
 		if (bo->boundingBox().intersectsRect(support->boundingBox())) {
-			auto label_S = Label::createWithTTF("you lost", "fonts/Marker Felt.ttf", 50);
+			this->unscheduleAllSelectors();
+			auto label2 = Label::createWithTTF("", "fonts/Marker Felt.ttf", 50);
+			label2->setColor(ccc3(255, 255, 225));
+			label2->setPosition(Winsize.width / 2, Winsize.height / 2);
+			addChild(label2, 88);
+			char*str2 = new char[10];
+			sprintf(str2, "Your TotalScore Is %d", (int)TotalScore);
+			label2->setString(str2);
+
+			auto item1 = MenuItemLabel::create(Label::createWithSystemFont("Next Level", "fonts/Marker Felt.ttf", 30), CC_CALLBACK_1(Level_1Scene::NextScene, this));
+			auto menu = Menu::create(item1, NULL);
+			menu->setPosition(Director::getInstance()->getVisibleSize().width / 2, Director::getInstance()->getVisibleSize().height / 2 + 40);
+			menu->alignItemsVerticallyWithPadding(30);
+			this->addChild(menu, 1);
+
+			this->stopAllActions();
+			/*auto label_S = Label::createWithTTF("you lost", "fonts/Marker Felt.ttf", 50);
+			this->unscheduleAllSelectors();
 			label_S->setColor(ccc3(255, 255, 225));
 			label_S->setPosition(Winsize.width / 2, Winsize.height / 2);
-			addChild(label_S, 88);
-			Director::getInstance()->pause();
+			addChild(label_S, 88);*/
+			//Director::getInstance()->pause();
 			
 		}
-
 	}
 }
 
-//void Level_1Scene::draw() {
-
-//}
 void Level_1Scene::ReturnMain(Ref *ref){
-	//this->stopAllActions();
+	this->stopAllActions();
 	auto Scene = HelloWorld::createScene();
 	Director::getInstance()->replaceScene(Scene);
 }
@@ -382,9 +392,7 @@ bool Level_1Scene::iscollision(CCSprite*sprite1, CCSprite*sprite2){
 
 void Level_1Scene::ScoreRun()
 {
-
 	sprintf(C_GetScore, "%d", TotalScore);
-	CCLOG(C_GetScore, "%d", TotalScore);//测试
 	NumScore->setString(C_GetScore);
 
 }
