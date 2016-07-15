@@ -77,11 +77,6 @@ bool PushBoxScene::init()
 	destination1->setPosition(destination1_position);
 	map->addChild(destination1);
 
-	destination3 = Sprite::create("PushBox/finish.png");
-	destination3->setVisible(false);
-	destination3->setAnchorPoint(Vec2(0, 0));
-	destination3->setPosition(destination1_position);
-	map->addChild(destination3);
 
 
 	ValueMap values2 = obj0.at(1).asValueMap();
@@ -94,13 +89,6 @@ bool PushBoxScene::init()
 	destination2_position = Vec2(x2, y2 + 64);
 	destination2->setPosition(destination2_position);
 	map->addChild(destination2);
-
-	destination4 = Sprite::create("PushBox/finish.png");
-	destination4->setVisible(false);
-	destination4->setAnchorPoint(Vec2(0, 0));
-	destination4->setPosition(destination2_position);
-	map->addChild(destination4);
-
 
 
 	TMXObjectGroup* box_objects = map->getObjectGroup("box");
@@ -550,43 +538,11 @@ void PushBoxScene::onDownPressed(Ref* sender)
 
 bool PushBoxScene::if_win(Ref* sender)
 {
-	if (box1_position == destination1_position){
-		box1->setVisible(false);
-		destination3->setVisible(true);
-		destination1->setVisible(false);
-	}
-	else if (box2_position == destination1_position) {
-		box2->setVisible(false);
-		destination3->setVisible(true);
-		destination1->setVisible(false);
-	}
-	else if (box2_position == destination2_position){
-		box2->setVisible(false);
-		destination4->setVisible(true);
-		destination2->setVisible(false);
-	}
-	else if (box1_position == destination2_position) {
-		box1->setVisible(false);
-		destination4->setVisible(true);
-		destination2->setVisible(false);
-	}
-	else {
-		box2->setVisible(true);
-		box1->setVisible(true);
-		destination2->setVisible(true);
-		destination4->setVisible(false);
-		destination1->setVisible(true);
-		destination3->setVisible(false);
-	}
 	if (box1_position == destination1_position && box2_position == destination2_position
 		|| box1_position == destination2_position && box2_position == destination1_position) {
 		least_step_count = step_count;
-		destination1->setVisible(false);
-		destination2->setVisible(false);
-		destination3->setVisible(true);
-		destination4->setVisible(true);
-		box1->setVisible(false);
-		box2->setVisible(false);
+
+
 		//detect the XML file
 		if (!database->getBoolForKey("isExist")){
 			database->setBoolForKey("isExist", true);

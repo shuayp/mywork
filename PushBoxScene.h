@@ -44,9 +44,6 @@ private:
 
 	Sprite* destination1;
 	Sprite* destination2;
-	Sprite* destination3;
-	Sprite* destination4;
-
 	Vec2 destination1_position;
 	Vec2 destination2_position;
 
